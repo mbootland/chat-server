@@ -23,20 +23,18 @@ function serveStatic(response, cache, absPath){
   if (cache[absPath]) {
     sendFile(response, absPath, cache[absPath]);
   } else {
-    fs.exists(absPath, function(exists) {
-      if (exists) {
-        fs.readFile(absPath, function(err, data){
-          if (err) {
-            send404(response);
-          } else {
-            cache[absPath] = data;
-            sendFile(response, absPath, data);
-          }
-        });
-      } else {
-        send404(response);
-      }
-    });
+    if (fs.existsSync(absPath)) {
+      fs.readFile(absPath, function(err, data){
+        if (err) {
+          send404(response);
+        } else {
+          cache[absPath] = data;
+          sendFile(response, absPath, data);
+        }
+      });
+    } else {
+      send404(response);
+    }
   }
 }
 
@@ -55,23 +53,23 @@ server.listen(3000, function(){
   console.log("Server listening on port 3000")
 });
 
-var chatServer = require('./lib/chat_server');
-chatServer.listen(server);
-
-exports.listen = function(server) {
-  io = socketio.listen(server);
-  io.set('log level', 1);
-  io.sockets.on('connection', function (socket) {
-    guestNumber = assignGuestName(socket, guestNumber,
-      nickNames, namesUsed);
-    joinRoom(socket, 'Lobby');
-    handleMessageBroadcasting(socket, nickNames);
-    handleNameChangeAttempts(socket, nickNames, namesUsed);
-    handleRoomJoining(socket);
-    socket.on('rooms', function() {
-      socket.emit('rooms', io.sockets.manager.rooms);
-    });
-
-    handleClientDisconnection(socket, nickNames, namesUsed);
-  });
-};
+// var chatServer = require('./lib/chat_server');
+// chatServer.listen(server);
+//
+// exports.listen = function(server) {
+//   io = socketio.listen(server);
+//   io.set('log level', 1);
+//   io.sockets.on('connection', function (socket) {
+//     guestNumber = assignGuestName(socket, guestNumber,
+//       nickNames, namesUsed);
+//     joinRoom(socket, 'Lobby');
+//     handleMessageBroadcasting(socket, nickNames);
+//     handleNameChangeAttempts(socket, nickNames, namesUsed);
+//     handleRoomJoining(socket);
+//     socket.on('rooms', function() {
+//       socket.emit('rooms', io.sockets.manager.rooms);
+//     });
+//
+//     handleClientDisconnection(socket, nickNames, namesUsed);
+//   });
+// };
